@@ -1,2 +1,3 @@
 declare function get_token(username: string, password: string): Promise<string>;
-export { get_token };
+declare function get_csrf_token(): Promise<string>;
+export { get_token, get_csrf_token};

@@ -48,7 +48,7 @@ function jump_link(){
 }
 
 // 主视频的播放路径
-const video_path = ref('src/assets/video/Honkai  Star Rail 2024.03.03 - 12.20.34.03.mp4')
+const video_path = ref('src/assets/video/v1.mp4')
 
 // 推荐视频列表（动态加载）
 const videoList = ref([])

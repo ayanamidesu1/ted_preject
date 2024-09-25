@@ -18,4 +18,15 @@ async function get_token(username: string, password: string) {
     }
 }
 
-export {get_token}
+async function get_csrf_token() {
+    try {
+        const res = await fetch('http://127.0.0.1:8000/api/csrf/',)
+        const data = await res.json()
+        return data
+    }
+    catch (e) {
+        console.log(e)
+    }
+}
+
+export {get_token, get_csrf_token}

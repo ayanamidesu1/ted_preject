@@ -2,15 +2,21 @@ import os
 from PIL import Image, ImageOps
 import io
 
+
 class ReWriteImg:
     def __init__(self, width=200, height=200):
         self.file = None
         self.width = width
         self.height = height
+        self.max_size = 10 * 1024 * 1024  # 10MB 文件大小限制
 
-    # 设置文件
+    # 设置文件并检查文件格式和大小
     def set_file(self, file):
         self.file = file
+        if not self.is_safe_image():
+            raise ValueError("Unsupported or invalid image format.")
+        if not self.check_file_size():
+            raise ValueError(f"File size exceeds the limit of {self.max_size / (1024 * 1024)} MB.")
 
     # 检查文件格式是否为安全的图像格式
     def is_safe_image(self) -> bool:
@@ -21,15 +27,21 @@ class ReWriteImg:
         ext = os.path.splitext(self.file.name)[1].lower()
         allowed_extensions = ['.jpg', '.jpeg', '.png', '.tiff']
         if ext not in allowed_extensions:
-            raise ValueError(f"Unsupported image format: {ext}")
+            return False
 
         # 检查是否为图像文件
         try:
             img = Image.open(self.file)
             img.verify()  # 检查文件是否损坏或非图像
             return True
-        except (IOError, SyntaxError) as e:
-            raise ValueError("Invalid image file.")
+        except (IOError, SyntaxError):
+            return False
+
+    # 检查文件大小是否小于最大允许大小
+    def check_file_size(self) -> bool:
+        if not self.file:
+            raise ValueError("No file provided.")
+        return self.file.size <= self.max_size
 
     # 执行裁剪和格式化处理
     def process_image(self) -> io.BytesIO:

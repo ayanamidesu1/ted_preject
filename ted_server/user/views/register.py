@@ -9,11 +9,19 @@ from django.db import connection, transaction
 from django.views import View
 from .log.log import Logger
 from .re_write_img import ReWriteImg
+from rest_framework.permissions import AllowAny
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.contrib.auth.hashers import make_password
+from django.views.decorators.csrf import csrf_exempt
+
 
 class RegisterView(View):
     logger = Logger()
     rewrite_img = ReWriteImg(200, 200)
+    permission_classes = [AllowAny]
 
+    @csrf_exempt
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         self.default_img_root_path = 'H:/ted_preject/ted_server/static/img/'
@@ -38,7 +46,7 @@ class RegisterView(View):
         request_ip = request.META['REMOTE_ADDR']
         now = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
         request_content = request.body.decode('utf-8')
-        return f'{request_ip}在{now}访问了{request_path}，请求参数为{request_content}'
+        return f'{request_ip}在{now}访问了{request_path}'
 
     def get(self, request):
         self.logger.warning(self.request_path(request))
@@ -89,9 +97,8 @@ class RegisterView(View):
                     is_staff, is_active, date_joined, avatar_path, sex, birthday) 
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     '''
-                    password = userinfo.get('password', None)
-                    # 密码 md5 加密
-                    password = hashlib.md5(password.encode('utf-8')).hexdigest()
+                    # 密码加密
+                    password = make_password(userinfo.get('password', None))
                     last_login = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     is_superuser = 0
                     username = userinfo.get('username', None)
@@ -110,4 +117,4 @@ class RegisterView(View):
 
         except Exception as e:
             self.logger.error(self.request_path(request) + f'，错误信息为{e}')
-            return render(request, '500.html', status=500)
+            return JsonResponse({'status': '500', 'msg': '服务器错误，请稍后重试'}, status=500)

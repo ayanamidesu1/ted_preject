@@ -56,7 +56,7 @@ let re_data = ref([
     {
         video_id: 1,
         video_name: '视频名称',
-        video_mat: 'src/assets/video/Honkai  Star Rail 2024.03.03 - 12.20.34.03.mp4',
+        video_mat: 'src/assets/video/v1.mp4',
         video_speaker: '视频作者',
         video_create_time: '2024-03-03',
         video_watch_count: 100,
@@ -65,7 +65,7 @@ let re_data = ref([
     {
         video_id: 2,
         video_name: '视频名称',
-        video_mat: 'src/assets/video/Honkai  Star Rail 2024.03.03 - 12.20.34.03.mp4',
+        video_mat: 'src/assets/video/v1.mp4',
         video_speaker: '视频作者',
         video_create_time: '2024-03-03',
         video_watch_count: 100,
@@ -74,7 +74,7 @@ let re_data = ref([
     {
         video_id: 3,
         video_name: '视频名称',
-        video_mat: 'src/assets/video/Honkai  Star Rail 2024.03.03 - 12.20.34.03.mp4',
+        video_mat: 'src/assets/video/v1.mp4',
         video_speaker: '视频作者',
         video_create_time: '2024-03-03',
         video_watch_count: 100,
@@ -83,7 +83,7 @@ let re_data = ref([
     {
         video_id: 4,
         video_name: '视频名称',
-        video_mat: 'src/assets/video/Honkai  Star Rail 2024.03.03 - 12.20.34.03.mp4',
+        video_mat: 'src/assets/video/v1.mp4',
         video_speaker: '视频作者',
         video_create_time: '2024-03-03',
         video_watch_count: 100,

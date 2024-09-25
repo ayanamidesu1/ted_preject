@@ -73,7 +73,7 @@ let intruduction_item=ref(`我们已经快到 2020 年代的一半了，这个�
 let main_video_tags=ref(['标签1','标签2','标签3'])
 
 // 主视频的播放路径
-const video_path = ref('src/assets/video/Honkai  Star Rail 2024.03.03 - 12.20.34.03.mp4')
+const video_path = ref('src/assets/video/v1.mp4')
 
 
 // 更新主视频的剩余时间

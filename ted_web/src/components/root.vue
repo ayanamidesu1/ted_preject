@@ -10,7 +10,7 @@ import { useStore } from 'vuex';
 import login from './login_page/login.vue'
 import register from './register_page/register.vue';
 import { useRoute } from 'vue-router';
-import {get_token} from './auto_token_auth'
+import {get_token,get_csrf_token} from './auto_token_auth'
 
 const store = useStore();
 const router = useRoute();
@@ -22,6 +22,11 @@ let register_page_show = computed(()=>store.getters.register_page_show);
 onMounted(async ()=>{
   let token=await get_token('test_user','123456');
   console.log(token);
+  let csrf_token=await get_csrf_token();
+  localStorage.setItem('csrf_token',csrf_token);
+  //设置csrf_token的cookie
+  document.cookie=`csrf_token=${csrf_token};path=/;domain=localhost;`
+  console.log(csrf_token);
 })
 
 </script>

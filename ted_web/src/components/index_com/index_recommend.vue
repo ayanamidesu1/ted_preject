@@ -61,7 +61,7 @@ let video_player_info = ref({
 })
 
 // 视频路径
-let video_path = ref('src/assets/video/Honkai  Star Rail 2024.03.03 - 12.20.34.03.mp4')
+let video_path = ref('src/assets/video/v1.mp4')
 
 // 剩余时间
 let remainingTime = ref(0)

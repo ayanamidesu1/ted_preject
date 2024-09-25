@@ -43,6 +43,17 @@ TEMPLATES = [
     },
 ]
 
+#跨域允许列表
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:10000",  # 添加这个地址
+    "http://127.0.0.1:10000",  # 或者这个
+]
+#跨域允许列表
+CSRF_TRUSTED_ORIGINS=[
+    "http://localhost:10000",
+    "http://127.0.0.1:10000"
+]
+
 # CORS settings
 INSTALLED_APPS = [
     'django.contrib.auth',
@@ -51,8 +62,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    "user.apps.UserConfig"  # Enable CORS support
-    ''
+    "user.apps.UserConfig",  # Enable CORS support
 ]
 
 MIDDLEWARE = [
@@ -61,7 +71,9 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
+    'user.views.DisableCSRFCookieMiddleware.DisableCSRFCookieMiddleware',
+    #'django.middleware.csrf.CsrfViewMiddleware',  废物认证，不适用现代浏览器弃用三方cookie，需要重写认证逻辑，使用头部包含认证信息
+    #'ted_server.middleware.csrf_generate_auth.CustomCSRFMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
@@ -77,7 +89,7 @@ REST_FRAMEWORK = {
 ROOT_URLCONF = 'ted_server.urls'
 
 # Allow all origins for CORS (not recommended in production)
-CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = False
 
 # Other configurations
 LANGUAGE_CODE = 'en-us'
@@ -85,4 +97,10 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 STATIC_URL = 'static/'
+# 禁用 CSRF Cookie
+CSRF_COOKIE_HTTPONLY = False  # CSRF 不再依赖 cookies，禁用该选项
+CSRF_USE_SESSIONS = False     # 不使用 Session 存储 CSRF Token
+CSRF_COOKIE_NAME = 'csrftoken'        # 不使用 cookie 名称
+CORS_ALLOW_CREDENTIALS = True
+
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

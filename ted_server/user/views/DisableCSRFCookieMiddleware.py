@@ -1,13 +1,7 @@
-# 创建一个新的中间件类
-class DisableCSRFCookieMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
+# user/middleware.py
+from django.utils.deprecation import MiddlewareMixin
 
-    def __call__(self, request):
-        # 处理请求
-        response = self.get_response(request)
-        return response
-
+class DisableCSRFCookieMiddleware(MiddlewareMixin):
     def process_response(self, request, response):
         # 禁止设置 CSRF cookie
         if 'Set-Cookie' in response:

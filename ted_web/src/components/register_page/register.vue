@@ -27,6 +27,25 @@
                     <span>确认密码：</span>
                     <input type="password" placeholder="请再次输入密码" v-model="confirmPassword" required>
                 </div>
+                <div class="input_box">
+                    <span>姓：</span>
+                    <input type="text" placeholder="请输入姓" v-model="first_name" required>
+                </div>
+                <div class="input_box">
+                    <span>名：</span>
+                    <input type="text" placeholder="请输入名" v-model="last_name" required>
+                </div>
+                <div class="input_box">
+                    <span>性别：</span>
+                    <select v-model="sex" required>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+                <div class="input_box">
+                    <span>生日：</span>
+                    <input type="date" v-model="birthday" required>
+                </div>
                 <div class="error_msg" v-if="errorMessage">{{ errorMessage }}</div>
                 <div class="register_btn">
                     <span @click="validateAndRegister">注册</span>
@@ -41,11 +60,18 @@ import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { register } from './register';
 
+let files = null
 let register_info = ref({
     username: '',
     email: '',
-    password: ''
+    password: '',
+    sex: '',
 })
+let first_name = ref('')
+let last_name = ref('')
+let sex = ref('')
+let birthday = ref('')
+
 let confirmPassword = ref('')
 let avatar = ref('src/assets/svg/默认头像.svg')
 let avatarInput = ref(null)
@@ -58,6 +84,7 @@ function clickAvatarInput() {
 
 function changeAvatar(event) {
     const file = event.target.files[0]
+    files = file
     if (file) {
         const reader = new FileReader()
         reader.onload = (e) => {
@@ -67,20 +94,30 @@ function changeAvatar(event) {
     }
 }
 
-function validateAndRegister() {
+async function validateAndRegister() {
     errorMessage.value = ''
-    if (register_info.value.password !== confirmPassword.value) {
+    /*if (register_info.value.password !== confirmPassword.value) {
         errorMessage.value = '两次输入的密码必须相同'
         return
     }
-    
+
     if (!validatePassword(register_info.value.password)) {
         errorMessage.value = '密码必须大于8个字符，且包含至少两种不同类型的字符'
         return
+    }*/
+
+    let res =await register(files, register_info.value.username, register_info.value.password, first_name.value, last_name.value,
+        register_info.value.email, sex.value, birthday.value
+    )
+    if (res.status == 200 || res.status == 201) {
+        console.log(res)
+        // 这里可以添加注册逻辑并处理头像文件
+        //store.commit('SET_SINGLE_PAGE_STATUS', { key: 'login_page_show', value: true })
+    }
+    else{   
+        console.log(res)
     }
 
-    // 这里可以添加注册逻辑并处理头像文件
-    store.commit('SET_SINGLE_PAGE_STATUS', { key: 'login_page_show', value: true })
 }
 
 function validatePassword(password) {
@@ -131,19 +168,22 @@ function validatePassword(password) {
     object-fit: cover;
     background-color: #f0f0f0;
 }
-.choose_btn{
-    background-color: rgb(0,150,250);
-    padding:5px 10px;
+
+.choose_btn {
+    background-color: rgb(0, 150, 250);
+    padding: 5px 10px;
     border-radius: 5px;
     color: white;
     cursor: pointer;
 }
-.choose_btn:hover{
-   opacity: 0.8;
-   transform: scale(1.01);
-   transition: all 0.2s ease;
-   transform: translateY(-1px);
+
+.choose_btn:hover {
+    opacity: 0.8;
+    transform: scale(1.01);
+    transition: all 0.2s ease;
+    transform: translateY(-1px);
 }
+
 input[type="text"],
 input[type="password"],
 input[type="email"] {
