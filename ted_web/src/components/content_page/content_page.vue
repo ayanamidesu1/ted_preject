@@ -42,6 +42,7 @@
                     </div>
                 </div>
                 <speaker_box/>
+                <auto_textarea></auto_textarea>
                 <div class="the_end_page_box">
                     <the_end_page/>
                 </div>
@@ -58,6 +59,7 @@ import { ref, onMounted } from 'vue'
 import recommend_box from './recommend_box.vue';
 import speaker_box from './speaker_box.vue';
 import the_end_page from './the_end_page.vue';
+import auto_textarea from './auto_textarea.vue'
 
 let main_video_title=ref('气候变化的临界点——以及我们的现状')
 let main_video_info=ref({
