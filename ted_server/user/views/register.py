@@ -98,13 +98,33 @@ class RegisterView(View):
                     VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     '''
                     # 密码加密
-                    password = make_password(userinfo.get('password', None))
+                    password=userinfo.get('password', None)
+                    if password is None:
+                        return JsonResponse({'status': '400', 'msg': '密码缺失'}, status=400)
+                    if len(password) < 8:
+                        return JsonResponse({'status': '400', 'msg': '密码长度不能小于8位'}, status=400)
+                    #密码必须包含两种不同的字符
+                    if len(set(password)) < 2:
+                        return JsonResponse({'status': '400', 'msg': '密码必须包含两种不同的字符'}, status=400)
+                    password = make_password(password)
                     last_login = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                     is_superuser = 0
                     username = userinfo.get('username', None)
+                    username_sql='''
+                    select * from auth_user where username=%s
+                    '''
+                    cursor.execute(username_sql,[username])
+                    if cursor.fetchone():
+                        return JsonResponse({'status': '400', 'msg': '用户名已存在'}, status=400)
                     first_name = userinfo.get('first_name', None)
                     last_name = userinfo.get('last_name', None)
                     email = userinfo.get('email', None)
+                    email_sql='''
+                    select * from auth_user where email=%s
+                    '''
+                    cursor.execute(email_sql,[email])
+                    if cursor.fetchone():
+                        return JsonResponse({'status': '400', 'msg': '邮箱已存在'}, status=400)
                     is_staff = 1
                     is_active = 1
                     date_joined = datetime.now().strftime("%Y-%m-%d %H:%M:%S")

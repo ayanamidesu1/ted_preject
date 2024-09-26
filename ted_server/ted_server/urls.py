@@ -6,11 +6,13 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
-
+from django.conf import settings
+from django.conf.urls.static import static
 from ted_server.get_csrf_token import CSRFTokenView
+from ted_server.views import CustomTokenObtainPairView
 
 urlpatterns = [
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
     #获取新token
     path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     #刷新token
@@ -20,4 +22,4 @@ urlpatterns = [
     #用户模块接口
     path('api/csrf/',CSRFTokenView.as_view(),name='csrf'),
     #获取csrf token
-]
+]+ static(settings.STATIC_URL, document_root=settings.BASE_DIR / 'static')

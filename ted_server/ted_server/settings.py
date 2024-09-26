@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 import pymysql
 from pathlib import Path
 
@@ -86,6 +88,12 @@ REST_FRAMEWORK = {
     ),
 }
 
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    # 其他配置...
+}
+
 ROOT_URLCONF = 'ted_server.urls'
 
 # Allow all origins for CORS (not recommended in production)
@@ -97,6 +105,10 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 STATIC_URL = 'static/'
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',  # 将静态文件存放在项目的 static 文件夹中
+]
+
 # 禁用 CSRF Cookie
 CSRF_COOKIE_HTTPONLY = False  # CSRF 不再依赖 cookies，禁用该选项
 CSRF_USE_SESSIONS = False     # 不使用 Session 存储 CSRF Token

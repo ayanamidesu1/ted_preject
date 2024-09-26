@@ -14,6 +14,9 @@
                     </div>
                     <span @click="clickAvatarInput()" class="choose_btn">选择</span>
                     <input type="file" name="avatar" accept="image/*" @change="changeAvatar($event)" ref="avatarInput">
+                    <div class="tips" style="margin-top: 10px;">
+                        <span>仅支持JPG/JPEG、png、tiff格式图片，最大为10MB</span>
+                    </div>
                 </div>
                 <div class="input_box">
                     <span>邮箱地址：</span>
@@ -27,7 +30,10 @@
                     <span>确认密码：</span>
                     <input type="password" placeholder="请再次输入密码" v-model="confirmPassword" required>
                 </div>
-                <div class="input_box">
+                <div class="tips">
+                    <span>密码长度最少8位，至少包含两种字符</span>
+                </div>
+                <div class="input_box" style="margin-top: 10px;">
                     <span>姓：</span>
                     <input type="text" placeholder="请输入姓" v-model="first_name" required>
                 </div>
@@ -59,6 +65,9 @@
 import { ref } from 'vue'
 import { useStore } from 'vuex'
 import { register } from './register';
+import { useRouter } from 'vue-router';
+
+const router = useRouter()
 
 let files = null
 let register_info = ref({
@@ -96,7 +105,7 @@ function changeAvatar(event) {
 
 async function validateAndRegister() {
     errorMessage.value = ''
-    /*if (register_info.value.password !== confirmPassword.value) {
+    if (register_info.value.password !== confirmPassword.value) {
         errorMessage.value = '两次输入的密码必须相同'
         return
     }
@@ -104,7 +113,7 @@ async function validateAndRegister() {
     if (!validatePassword(register_info.value.password)) {
         errorMessage.value = '密码必须大于8个字符，且包含至少两种不同类型的字符'
         return
-    }*/
+    }
 
     let res =await register(files, register_info.value.username, register_info.value.password, first_name.value, last_name.value,
         register_info.value.email, sex.value, birthday.value
@@ -112,7 +121,7 @@ async function validateAndRegister() {
     if (res.status == 200 || res.status == 201) {
         console.log(res)
         // 这里可以添加注册逻辑并处理头像文件
-        //store.commit('SET_SINGLE_PAGE_STATUS', { key: 'login_page_show', value: true })
+        router.push('/login')
     }
     else{   
         console.log(res)
@@ -134,9 +143,12 @@ function validatePassword(password) {
 .register_page {
     display: flex;
     justify-content: center;
-    align-items: center;
-    height: 100vh;
+    align-items: flex-start; /* 从顶部对齐，使得 margin 生效 */
+    min-height: 100vh; /* 保证页面最小高度为视窗高度 */
     background-color: #f5f5f5;
+    padding-top: 100px; /* 给顶部留 100px */
+    padding-bottom: 100px; /* 给底部留 100px */
+    box-sizing: border-box; /* 确保 padding 不影响宽度 */
 }
 
 .content {
@@ -144,7 +156,17 @@ function validatePassword(password) {
     padding: 20px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    width: 300px;
+    width: 500px;
+    margin-top: auto;
+    margin-bottom: auto;
+    max-height: calc(100vh - 200px); /* 确保内容不会超出视窗 200px 的空隙 */
+    box-sizing: border-box;
+    overflow-y: auto; /* 当内容超出时允许滚动 */
+}
+.content::-webkit-scrollbar {
+    width: none;
+    height: none;
+    display: none;
 }
 
 .register_box {

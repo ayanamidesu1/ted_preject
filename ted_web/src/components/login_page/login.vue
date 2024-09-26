@@ -7,9 +7,9 @@
                 <div class="tips">
                     <span>输入你的账号</span>
                 </div>
-                <span>邮箱地址</span>
+                <span>用户名</span>
                 <div class="input_box">
-                    <input type="text" v-model="email">
+                    <input type="text" v-model="username" placeholder="请输入用户名">
                 </div>
                 <div class="continue" @click="continueToPassword">
                     <span>继续</span>
@@ -24,7 +24,7 @@
                 </div>
                 <span>密码</span>
                 <div class="input_box">
-                    <input type="password">
+                    <input type="password" v-model="password" placeholder="请输入密码">
                 </div>
                 <div class="login_btn" @click="login">
                     <span>登录</span>
@@ -37,16 +37,20 @@
 <script setup>
 import { ref } from 'vue'
 import { useStore } from 'vuex';
+import { useRouter } from 'vue-router';
+import {get_token} from '../auto_token_auth'
 
+const router = useRouter();
 const store = useStore();
 
 // 邮箱和状态
-const email = ref('')
+const username = ref('')
+const password=ref('')
 const emailEntered = ref(false)
 
 // 点击继续时触发
 function continueToPassword() {
-    if (validateEmail(email.value)) {
+    if (validateEmail(username.value)) {
         emailEntered.value = true
     } else {
         alert('请输入有效的邮箱地址')
@@ -55,14 +59,28 @@ function continueToPassword() {
 
 // 简单的邮箱验证函数
 function validateEmail(email) {
-    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-    return re.test(email)
+    //const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    return  true//re.test(email)
 }
 
 // 登录按钮点击事件（接口待定）
-function login() {
+async function login() {
+    console.log(username.value)
+    console.log(password.value)
+    let res=await get_token(username.value,password.value)
+    if(res.status==200){
     store.commit('SET_SINGLE_PAGE_STATUS',{'key':'index_page_show','value':true})
     //alert('登录接口待定')
+    let auth_token=res.access
+    let refresh_token=res.refresh
+    localStorage.setItem('auth_token',auth_token)
+    localStorage.setItem('refresh_token',refresh_token)
+    router.push('/')
+    }
+    else{
+        alert('用户名或密码错误')
+        console.log(res)
+    }
 }
 </script>
 

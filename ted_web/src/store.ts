@@ -15,6 +15,7 @@ const store = createStore<RootState>({
         pageStack: [],
         pushTimer: null,
         video_id: '',
+        is_login: false,
     },
     mutations: {
         SET_SINGLE_PAGE_STATUS(state:any, { key = '', value = false }) {
@@ -67,6 +68,9 @@ const store = createStore<RootState>({
         },
         set_video_id(state:any, video_id:any) {
             state.video_id = video_id;
+        },
+        set_login_status(state:any, is_login:any) {
+            state.is_login = is_login;
         }
     },
     actions: {
@@ -78,7 +82,8 @@ const store = createStore<RootState>({
         login_page_show: (state:any) => state.pageStatus.login_page_show,
         index_page_show: (state:any) => state.pageStatus.index_page_show,
         register_page_show: (state:any) => state.pageStatus.register_page_show,
-        video_id: (state:any) => state.video_id
+        video_id: (state:any) => state.video_id,
+        is_login: (state:any) => state.is_login
     },
 });
 

@@ -29,10 +29,14 @@
                     <router-link to="/content_page">
                         <div class="jump_link">
                             <video class="video" :src="video_path" preload="auto" ref="videoElement"
+                            :muted="isMuted"
                                 @mouseenter="playVideo" @mouseleave="pauseVideo" @timeupdate="updateTime">
                             </video>
                             <div class="remaining_time">
                                 剩余时间: {{ remainingTime }} 秒
+                            </div>
+                            <div class="open_radio" @click="switch_sound($event)">
+                                <img :src="'/src/assets/svg/'+(isMuted?'声音关.svg':'声音开.svg')" class="icon">
                             </div>
                         </div>
                     </router-link>
@@ -53,6 +57,15 @@ import recommend_more from './recommend_more.vue';
 const store = useStore()
 const router = useRouter()
 
+//声音开关
+let isMuted = ref(true)
+function switch_sound(event) {
+    //阻止默认冒泡事件
+    event.stopPropagation()
+    event.preventDefault();
+    isMuted.value = !isMuted.value
+}
+
 // 视频信息
 let video_player_info = ref({
     'play_count': 0,
@@ -69,15 +82,20 @@ let remainingTime = ref(0)
 // 引用视频元素
 let videoElement = ref(null)
 
-// 鼠标移入时播放视频
+// 鼠标移入时尝试播放视频
 function playVideo() {
-    videoElement.value.play()
+    try {
+        videoElement.value.play()
+    } catch (error) {
+        console.error('视频播放失败，可能是因为用户没有与页面交互:', error);
+    }
 }
 
 // 鼠标移出时暂停视频
 function pauseVideo() {
-    videoElement.value.pause()
+    videoElement.value.pause();
 }
+
 
 // 更新剩余时长
 function updateTime() {
@@ -202,5 +220,29 @@ function goToVideoPage(videoId) {
 
 .video_play_info {
     color: rgb(133, 133, 133);
+}
+.icon{
+    width:25px;
+    height: 25px;
+    object-fit: cover;
+}
+.open_radio{
+    left: 5px;
+    bottom: 5px;
+    position: absolute;
+    z-index: 2;
+    cursor: pointer;
+    padding: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /*防止点击事件向下传播,仅在本事件传播*/
+    pointer-events: stroke;
+    z-index: 2;
+}
+.open_radio:hover{
+    background-color: rgba(233,233,233,0.5);
+    transition: all 0.2s ease-in-out;
+    border-radius: 50%;
 }
 </style>

@@ -48,11 +48,14 @@
             <span>项目4</span>
           </div>
         </div>
-        <div class="lable_item lable_item_hover">
+        <div class="lable_item lable_item_hover" v-if="!is_login">
           <span @click="show_login_page">登录</span>
         </div>
-        <div class="lable_item lable_item_hover">
+        <div class="lable_item lable_item_hover" v-if="!is_login">
           <span @click="show_register_page()">注册</span>
+        </div>
+        <div class="lable_item" v-if="is_login">
+          <user_box></user_box>
         </div>
         <div class="search_box">
           <div class="search_btn" @click="search_input_box_show = !search_input_box_show">
@@ -68,12 +71,15 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref,computed } from 'vue'
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
+import user_box from './user_box.vue';
 
 const store = useStore()
 const router = useRouter()
+
+let is_login=computed(()=>store.getters.is_login)
 
 let search_key = ref('')
 let search_input_box_show = ref(false)
