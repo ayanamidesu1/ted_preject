@@ -64,7 +64,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    "user.apps.UserConfig",  # Enable CORS support
+    "user.apps.UserConfig",
+    "comment.apps.CommentConfig"  # Enable CORS support
 ]
 
 MIDDLEWARE = [
@@ -89,8 +90,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(hours=24*30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     # 其他配置...
 }
 

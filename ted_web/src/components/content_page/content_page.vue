@@ -42,7 +42,16 @@
                     </div>
                 </div>
                 <speaker_box/>
-                <auto_textarea></auto_textarea>
+                <div class="send_comment_box">
+                    <div class="send_user_avatar">
+                        <img :src="'http://localhost:8000/static/img/thumbnail/'+user_info.avatar_path+'.png'">
+                    </div>
+                    <auto_textarea></auto_textarea>
+                    <div class="send_btn">
+                        <span>发送</span>
+                    </div>
+                </div>
+                <comment_box></comment_box>
                 <div class="the_end_page_box">
                     <the_end_page/>
                 </div>
@@ -60,7 +69,11 @@ import recommend_box from './recommend_box.vue';
 import speaker_box from './speaker_box.vue';
 import the_end_page from './the_end_page.vue';
 import auto_textarea from './auto_textarea.vue'
+import comment_box from './comment_box.vue';
 
+
+let user_info=ref(JSON.parse(localStorage.getItem('user')))
+console.log(user_info.value)
 let main_video_title=ref('气候变化的临界点——以及我们的现状')
 let main_video_info=ref({
     watch_count:'10086',
@@ -174,5 +187,44 @@ function updateMainVideoTime(event) {
 }
 .recommend_box::-webkit-scrollbar {
     display: none;
+}
+.send_comment_box{
+    margin-top: 10px;
+    width: auto;
+    height: auto;
+    display: flex;
+    flex-direction: row;
+    gap:8px;
+    justify-content: center;
+    align-items: center;
+}
+.send_user_avatar{
+    width: 50px;
+    height: 50px;
+    min-height: 50px;
+    min-width: 50px;
+}
+.send_user_avatar img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+.send_btn{
+    width: 80px;
+    height: 100%;
+    background-color: rgb(133,133,133);
+    color: white;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+}
+.send_btn:hover{
+    opacity: 0.8;
+    transform: scale(1.02);
+    transform: translateY(-1px);
 }
 </style>

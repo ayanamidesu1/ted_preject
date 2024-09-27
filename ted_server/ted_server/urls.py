@@ -22,4 +22,6 @@ urlpatterns = [
     #用户模块接口
     path('api/csrf/',CSRFTokenView.as_view(),name='csrf'),
     #获取csrf token
+    path('api/comment/',include('comment.url') ,name='comment'),
+    #评论模块接口
 ]+ static(settings.STATIC_URL, document_root=settings.BASE_DIR / 'static')
