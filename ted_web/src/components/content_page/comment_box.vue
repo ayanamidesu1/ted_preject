@@ -36,7 +36,9 @@
               </div>
 
               <!-- 主评论回复框 -->
-              <comment_input_box v-if="comment_input_box_show[index][0]" />
+              <comment_input_box v-if="comment_input_box_show[index][0]" :comment_type="'reply'"
+              :comment_id="mainComment.comment_id" :video_id="video_id"
+              />
             </div>
           </div>
         </div>
@@ -123,6 +125,7 @@ async function getMainCommentList() {
   let res = await get_comment_list(video_id.value, main_limit.value, main_offset.value);
   if (res.status == 200) {
     res = res.data;
+    console.log(res);
     main_comment_list.value.push(...res.rows);
     main_total.value = res.total;
     main_offset.value += main_limit.value;
@@ -143,6 +146,7 @@ async function getSubCommentList(mainCommentId, index) {
   let res = await get_reply_comment_list(video_id.value, mainCommentId, sub_limit.value);
   if (res.status == 200) {
     res = res.data;
+    console.log(res);
     sub_comment_list.value[index].push(...res.rows);
 
     // 初始化每个子评论的回复框显示状态

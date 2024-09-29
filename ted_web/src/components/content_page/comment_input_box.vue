@@ -11,16 +11,33 @@
 <script setup>
 import { ref, defineProps, defineEmits, watch } from 'vue';
 import auto_textarea from './auto_textarea.vue';
+import { add_comment } from './js/add_comment';
 
 // 定义 props 和 emits
 let props = defineProps({
     modelValue: {
         type: String,
         default: ''
+    },
+    comment_type:{
+        type: String,
+        default: 'comment'
+    },
+    comment_id:{
+        type:[String,Number],
+        default: ''
+    },
+    video_id:{
+        type:String,
+        default: ''
     }
 });
 
-let emit = defineEmits(['update:modelValue']);
+let emit = defineEmits(['update:modelValue','send_comment']);
+
+//返回的临时评论
+let temp_comment = ref({});
+let user=localStorage.getItem('user');
 
 // 内部的 text 值
 let text = ref(props.modelValue);
@@ -39,9 +56,11 @@ watch(
 );
 
 // 发送评论功能（根据实际逻辑实现）
-function sendComment() {
+async function sendComment() {
     if (text.value.trim()) {
         console.log('发送评论:', text.value);
+        let res=await add_comment(props.comment_id,text.value,props.comment_type,props.video_id);
+        console.log(res);
         // 发送完评论后清空输入框
         text.value = '';
     }

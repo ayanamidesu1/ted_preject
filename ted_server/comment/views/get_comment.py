@@ -26,9 +26,12 @@ class GetComment(APIView):
             offset=data.get('offset',0)
             if video_id:
                 sql='''
-                select *,comment_table.id as 'comment_id' ,video_info.id as 'video_id',auth_user.id as 'user_id'
+                select *,comment_table.id as 'comment_id' ,video_info.id as 'video_id',auth_user.id as 'user_id',
+                comment_interaction.id as 'in_id',comment_interaction.comment_id as 'in_comment_id'
                 from comment_table left join video_info on video_info.id=comment_table.video_id 
                 left join auth_user on auth_user.id=comment_table.send_user_id
+                left join comment_interaction on comment_table.id=comment_interaction.comment_id and 
+                comment_interaction.comment_type='comment'
                  where video_id=%s order by comment_table.send_time desc limit %s offset %s
                 '''
                 with connection.cursor() as cursor:

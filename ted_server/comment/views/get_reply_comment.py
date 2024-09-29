@@ -27,9 +27,12 @@ class GetReplyComment(APIView):
             offset=data.get('offset',0)
             if video_id:
                 sql='''
-                select *,comment_reply_table.id as 'comment_id' ,video_info.id as 'video_id',auth_user.id as 'user_id'
+                select *,comment_reply_table.id as 'comment_id' ,video_info.id as 'video_id',auth_user.id as 'user_id',
+                comment_interaction.id as 'in_id',comment_interaction.comment_id as 'in_comment_id'
                 from comment_reply_table left join video_info on video_info.id=comment_reply_table.belong_to_video_id 
                 left join auth_user on auth_user.id=comment_reply_table.send_user_id
+                left join comment_interaction on comment_reply_table.id=comment_interaction.comment_id and 
+                comment_interaction.comment_type='reply_comment'
                  where belong_to_video_id=%s and reply_comment_id=%s 
                  order by comment_reply_table.send_time desc limit %s offset %s
                 '''
