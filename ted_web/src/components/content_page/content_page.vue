@@ -46,10 +46,7 @@
                     <div class="send_user_avatar">
                         <img :src="'http://localhost:8000/static/img/thumbnail/'+user_info.avatar_path+'.png'">
                     </div>
-                    <auto_textarea></auto_textarea>
-                    <div class="send_btn">
-                        <span>发送</span>
-                    </div>
+                    <comment_input_box :video_id="video_id" :comment_type="'comment'" />
                 </div>
                 <comment_box></comment_box>
                 <div class="the_end_page_box">
@@ -64,13 +61,19 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted,computed } from 'vue'
 import recommend_box from './recommend_box.vue';
 import speaker_box from './speaker_box.vue';
 import the_end_page from './the_end_page.vue';
 import auto_textarea from './auto_textarea.vue'
 import comment_box from './comment_box.vue';
+import comment_input_box from './comment_input_box.vue';
+import { useStore } from 'vuex';
 
+const store = useStore()
+
+let video_id=computed(()=>store.getters.video_id)
+console.log(video_id.value)
 
 let user_info=ref(JSON.parse(localStorage.getItem('user')))
 console.log(user_info.value)

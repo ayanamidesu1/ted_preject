@@ -3,7 +3,7 @@
     <h2>评论</h2>
     <div class="content">
       <!-- 遍历主评论和子评论 -->
-      <div class="comment_group" v-for="(mainComment, index) in displayedMainComments" :key="mainComment.id">
+      <div class="comment_group" v-for="(mainComment, index) in displayedMainComments" :key="index">
         <!-- 主评论 -->
         <div class="main_comment">
           <div class="comment_info">
@@ -19,13 +19,13 @@
               <p>{{ mainComment.comment_content }}</p>
               <div class="comment_interaction">
                 <div class="interaction_box">
-                  <div class="inter_box">
+                  <div class="inter_box" @click="comm_interaction(mainComment.comment_id,'comment','like')">
                     <img src="../../assets/svg/点赞.svg" alt="点赞">
-                    <span></span>
+                    <span>{{mainComment.like_count}}</span>
                   </div>
-                  <div class="inter_box">
+                  <div class="inter_box" @click="comm_interaction(mainComment.comment_id,'comment','not_like')">
                     <img src="../../assets/svg/踩.svg" alt="踩">
-                    <span></span>
+                    <span>{{mainComment.not_like_count}}</span>
                   </div>
                   <div class="inter_box" @click="toggleReplyInput(index, 0)">
                     <img src="../../assets/svg/留言.svg" alt="回复">
@@ -56,16 +56,16 @@
                 <div class="username">
                   <span>{{ reply.author }}</span>
                 </div>
-                <p>回复: {{ reply.comment_content }}</p>
+                <p>回复:<span style="color: rgb(11,11,200);">@{{ reply.re_username }}</span> {{ reply.comment_content }}</p>
                 <div class="comment_interaction">
                   <div class="interaction_box">
-                    <div class="inter_box">
+                    <div class="inter_box" @click="comm_interaction(reply.comment_id,'reply','like')">
                       <img src="../../assets/svg/点赞.svg" alt="点赞">
-                      <span></span>
+                      <span>{{reply.like_count}}</span>
                     </div>
-                    <div class="inter_box">
+                    <div class="inter_box" @click="comm_interaction(reply.comment_id,'reply','not_like')">
                       <img src="../../assets/svg/踩.svg" alt="踩">
-                      <span></span>
+                      <span>{{reply.not_like_count}}</span>
                     </div>
                     <div class="inter_box" @click="toggleReplyInput(index, replyIndex + 1)">
                       <img src="../../assets/svg/留言.svg" alt="回复">
@@ -75,7 +75,9 @@
                   <span>{{ reply.send_time }}</span>
                 </div>
                 <!-- 子评论回复框 -->
-                <comment_input_box v-if="comment_input_box_show[index][replyIndex + 1]" />
+                <comment_input_box v-if="comment_input_box_show[index][replyIndex + 1]" :comment_type="'reply'"
+                :video_id="video_id" :comment_id="reply.comment_id"
+                />
               </div>
             </div>
           </div>
@@ -83,7 +85,7 @@
 
         <!-- 子评论查看更多按钮 -->
         <div class="show_more_sub"
-          v-if="sub_comment_list[index] && sub_comment_list[index].length > sub_display_limit[index]">
+          v-if="sub_comment_list[index] && sub_comment_list[index].length >= sub_display_limit[index]">
           <span @click="loadMoreSubComments(index)">查看更多子评论</span>
         </div>
       </div>
@@ -100,6 +102,7 @@ import { ref, onMounted, computed } from 'vue';
 import { get_comment_list, get_reply_comment_list } from './js/get_comment';
 import { useStore } from 'vuex';
 import comment_input_box from './comment_input_box.vue';
+import interaction_comment from './js/interaction_comment';
 
 const store = useStore();
 
@@ -188,6 +191,34 @@ function displayedSubComments(index) {
     return sub_comment_list.value[index].slice(0, sub_display_limit.value[index]);
   }
   return [];
+}
+
+//接收临时前端主评论直接压入栈顶
+function add_temp_main_comment(comment) {
+  main_comment_list.value.unshift(comment);
+  main_total.value++;
+  main_display_limit.value++;
+  sub_comment_list.value.unshift([]);
+  sub_display_limit.value.unshift(1);
+  comment_input_box_show.value.unshift([false]);
+}
+
+//接收临时子评论并压入对应主评轮下的子评论的栈顶
+function add_temp_sub_comment(comment, mainIndex) {
+  sub_comment_list.value[mainIndex].unshift(comment);
+  sub_display_limit.value[mainIndex]++;
+  comment_input_box_show.value[mainIndex].unshift(false);
+}
+
+//评论交互
+async function comm_interaction(comment_id,comment_type,interaction_type){
+  const res=await interaction_comment(comment_id,interaction_type,comment_type);
+  if(res.status==200){
+    console.log(res)
+  }
+  else{
+    console.log(res)
+  }
 }
 
 // 初始化评论加载
@@ -279,6 +310,8 @@ h2 {
   display: flex;
   cursor: pointer;
   padding: 5px;
+  align-items: center;
+  gap:5px;
 }
 
 .inter_box:hover {

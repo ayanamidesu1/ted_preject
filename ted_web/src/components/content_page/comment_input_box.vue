@@ -33,11 +33,24 @@ let props = defineProps({
     }
 });
 
-let emit = defineEmits(['update:modelValue','send_comment']);
-
-//返回的临时评论
-let temp_comment = ref({});
+let emit = defineEmits(['update:modelValue','send_comment','temp_comment','temp_reply_comment']);
 let user=localStorage.getItem('user');
+let date=new Date();
+//返回的临时评论
+let temp_comment = ref({
+    comment_id:'0',
+    avatar_path:user.avatar_path,
+    authr:user.username,
+    comment_content:'',
+    send_time:date.toLocaleString(),
+});
+let temp_reply_comment = ref({
+    comment_id:'0',
+    avatar_path:user.avatar_path,
+    authr:user.username,
+    comment_content:'',
+    send_time:date.toLocaleString()
+});
 
 // 内部的 text 值
 let text = ref(props.modelValue);
@@ -58,13 +71,30 @@ watch(
 // 发送评论功能（根据实际逻辑实现）
 async function sendComment() {
     if (text.value.trim()) {
+        console.log('视频ID:', props.video_id);
         console.log('发送评论:', text.value);
-        let res=await add_comment(props.comment_id,text.value,props.comment_type,props.video_id);
+        let res = await add_comment(props.comment_id, text.value, props.comment_type, props.video_id);
+        if (res.status === 200) {
+            const newComment = {
+                comment_id: '0', // 假设为临时评论的 ID
+                avatar_path: user.avatar_path,
+                author: user.username,
+                comment_content: text.value,
+                send_time: date.toLocaleString(),
+                reply_comment_id: props.comment_id // 关联的主评论 ID
+            };
+            if (props.comment_type === 'comment') {
+                emit('temp_comment', newComment);
+            } else if (props.comment_type === 'reply') {
+                emit('temp_reply_comment', newComment, props.comment_id); // 传递主评论 ID
+            }
+        }
         console.log(res);
         // 发送完评论后清空输入框
         text.value = '';
     }
 }
+
 </script>
 
 <style scoped>

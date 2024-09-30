@@ -27,7 +27,7 @@ class AddComment(APIView):
             user_id = request.user.id
             comment_type = data.get('comment_type')
             comment_content = data.get('comment_content')
-            comment_id = data.get('comment_id')
+            comment_id = data.get('comment_id','')
             video_id = data.get('video_id')
 
             # 校验输入
@@ -46,10 +46,10 @@ class AddComment(APIView):
                 if comment_type == 'comment':
                     sql = '''
                     INSERT INTO comment_table 
-                    (send_user_id, comment_content, comment_level, reply_comment_id, send_time, video_id) 
-                    VALUES (%s, %s, %s, %s, %s, %s)
+                    (send_user_id, comment_content, comment_level, send_time, video_id) 
+                    VALUES (%s, %s, %s, %s, %s)
                     '''
-                    cursor.execute(sql, (user_id, comment_content, 0, comment_id, now, video_id))
+                    cursor.execute(sql, (user_id, comment_content, 0,  now, video_id))
                     return JsonResponse({'status': 200, 'msg': '评论成功'}, status=200)
 
                 elif comment_type == 'reply':
@@ -62,5 +62,6 @@ class AddComment(APIView):
                     return JsonResponse({'status': 200, 'msg': '回复成功'}, status=200)
 
         except Exception as e:
+            print(e)
             logger.error(self.request_path(request) + str(e))
             return JsonResponse({'status': 500, 'msg': '服务器错误'}, status=500)
