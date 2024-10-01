@@ -20,13 +20,17 @@
                                 <img class="icon" src="../../assets/svg/分享.svg" alt="分享">
                                 <span>分享</span>
                             </div>
-                            <div class="collect_btn interaction_btn">
-                                <img class="icon" src="../../assets/svg/收藏.svg" alt="收藏">
+                            <div class="collect_btn interaction_btn" @click="interaction_video_a(video_id,'collect')">
+                                <img class="icon" 
+                                :src="'http://localhost:8000/static/svg/'+(main_video_info.is_collect?'收藏.svg':'没收藏.svg')" alt="收藏">
                                 <span>收藏</span>
+                                <span>{{main_video_info.collect_count}}</span>
                             </div>
-                            <div class="love_btn interaction_btn">
-                                <img class="icon" src="../../assets/svg/喜欢.svg" alt="喜欢">
+                            <div class="love_btn interaction_btn" @click="interaction_video_a(video_id,'like')">
+                                <img class="icon" 
+                                :src="'http://localhost:8000/static/svg/'+(main_video_info.is_like?'喜欢.svg':'不喜欢.svg')" alt="喜欢">
                                 <span>喜欢</span>
+                                <span>{{main_video_info.like_count}}</span>
                             </div>
                         </div>
                         <div class="main_video_intruduction">
@@ -70,6 +74,7 @@ import comment_box from './comment_box.vue';
 import comment_input_box from './comment_input_box.vue';
 import { useStore } from 'vuex';
 import get_video_info from './js/get_video_info';
+import interaction_video from './js/interaction_video';
 
 const store = useStore()
 
@@ -87,6 +92,40 @@ const video_path = ref('src/assets/video/v1.mp4')
 function updateMainVideoTime(event) {
     const video = event.target
     console.log('主视频剩余时间:', Math.floor(video.duration - video.currentTime))
+}
+
+//视频交互
+async function interaction_video_a(video_id,interaction_type){
+    try {
+        let res=await interaction_video(video_id,interaction_type)
+        if(res.status==200){
+            if(interaction_type=='like'){
+                main_video_info.value.is_like=!main_video_info.value.is_like
+                if(main_video_info.value.is_like){
+                    main_video_info.value.like_count+=1
+                }
+                else{
+                    main_video_info.value.like_count-=1
+                }
+            }
+            else if(interaction_type=='collect'){
+                main_video_info.value.is_collect=!main_video_info.value.is_collect
+                if(main_video_info.value.is_collect){
+                    main_video_info.value.collect_count+=1
+                }
+                else{
+                    main_video_info.value.collect_count-=1
+                }
+            }
+            console.log(res)
+        }
+        else{
+            console.log(res)
+        }
+    }
+    catch (error) {
+        console.log(error)
+    }
 }
 
 onMounted(async function(){

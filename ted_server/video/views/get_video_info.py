@@ -20,6 +20,7 @@ class GetVideoInfo(APIView):
     def post(self,request,*args,**kwargs):
         try:
             data=json.loads(request.body.decode('utf-8'))
+            user_id=request.user.id
             video_id=data.get('video_id',False)
             if video_id:
                 with connection.cursor() as cursor:
@@ -27,15 +28,30 @@ class GetVideoInfo(APIView):
                     select video_info.id, title,  author_id, video_info.introduce as 'video_introduce',
                      create_time, tags, video_file_path, auth_user.introduce as 'introduce',
                     video_status,username,auth_user.introduce,count(watch_table.id) as 'watch_count',
+                    count(like_table.id) as 'like_count',count(collect_table.id) as 'collect_count',
                     auth_user.user_tags,auth_user.self_website,auth_user.self_website_introduce,auth_user.avatar_path
                      from video_info left join auth_user on auth_user.id=video_info.author_id
                      left join watch_table on watch_table.video_id =video_info.id
+                     left join like_table on like_table.video_id=video_info.id
+                     left join collect_table on collect_table.video_id=video_info.id
                      where video_info.id=%s
-                     group by watch_table.id
+                     group by auth_user.id,video_info.id
                     '''
                     cursor.execute(sql,[video_id])
                     result=cursor.fetchone()
                     row_dict=dict(zip([column[0] for column in cursor.description],result))
+                    is_like_sql='''
+                    select * from like_table where video_id=%s and user_id=%s
+                    '''
+                    cursor.execute(is_like_sql,[video_id,user_id])
+                    is_like=cursor.fetchone()
+                    row_dict['is_like']=bool(is_like)
+                    is_collect_sql='''
+                    select * from collect_table where video_id=%s and user_id=%s
+                    '''
+                    cursor.execute(is_collect_sql,[video_id,user_id])
+                    is_collect=cursor.fetchone()
+                    row_dict['is_collect']=bool(is_collect)
                     return JsonResponse({'status':200,'msg':'获取成功','data':row_dict},status=200)
             else:
                 return JsonResponse({'status':400,'msg':'参数错误'},status=400)
