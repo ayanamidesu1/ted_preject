@@ -1,18 +1,18 @@
 <template>
     <div class="content_page">
-        <div class="content">
+        <div class="content" v-if="main_video_info">
             <div class="video_info">
                 <div class="video_box">
                     <!-- 主视频播放器 -->
                     <video class="main-video" controls :src="video_path" @timeupdate="updateMainVideoTime"></video>
                     <div class="info_item">
                         <div class="main_video_tite">
-                            {{main_video_title}}
+                            {{main_video_info.title}}
                         </div>
                         <div class="main_video_data">
                             <span>{{main_video_info.watch_count}}次观看</span>|
-                            <span>{{main_video_info.speaker}}</span>|
-                            <span>{{main_video_info.speaker_intruduction}}</span>|
+                            <span>{{main_video_info.username}}</span>|
+                            <span>{{main_video_info.introduce}}</span>|
                             <span>{{main_video_info.create_time}}</span>
                         </div>
                         <div class="interaction_box">
@@ -31,9 +31,9 @@
                         </div>
                         <div class="main_video_intruduction">
                             <div class="intruduction_item">
-                                {{ intruduction_item }}
+                                {{ main_video_info.video_introduce }}
                                 <div class="main_video_tags">
-                                    <div class="tag_item" v-for="(item,index) in main_video_tags" :key="index">
+                                    <div class="tag_item" v-for="(item,index) in main_video_info.tags" :key="index">
                                         <span>{{item}}</span>
                                     </div>
                                 </div>
@@ -41,7 +41,7 @@
                         </div>
                     </div>
                 </div>
-                <speaker_box/>
+                <speaker_box :user_info="main_video_info"/>
                 <div class="send_comment_box">
                     <div class="send_user_avatar">
                         <img :src="'http://localhost:8000/static/img/thumbnail/'+user_info.avatar_path+'.png'">
@@ -69,6 +69,7 @@ import auto_textarea from './auto_textarea.vue'
 import comment_box from './comment_box.vue';
 import comment_input_box from './comment_input_box.vue';
 import { useStore } from 'vuex';
+import get_video_info from './js/get_video_info';
 
 const store = useStore()
 
@@ -77,22 +78,10 @@ console.log(video_id.value)
 
 let user_info=ref(JSON.parse(localStorage.getItem('user')))
 console.log(user_info.value)
-let main_video_title=ref('气候变化的临界点——以及我们的现状')
-let main_video_info=ref({
-    watch_count:'10086',
-    speaker:'Speaker Name',
-    speaker_intruduction:'Speaker Intruduction',
-    create_time:'2024-03-03'
-})
-let intruduction_item=ref(`我们已经快到 2020 年代的一半了，这个十年被称为应对气候变化最具决定性的十年。
-现在的情况究竟如何？气候影响学者 Johan Rockström 对地球状况进行了最新的科学评估，
-并解释了必须采取哪些措施来保持地球对人类压力的适应力。`)
-
-let main_video_tags=ref(['标签1','标签2','标签3'])
+let main_video_info=ref({})
 
 // 主视频的播放路径
 const video_path = ref('src/assets/video/v1.mp4')
-
 
 // 更新主视频的剩余时间
 function updateMainVideoTime(event) {
@@ -100,6 +89,13 @@ function updateMainVideoTime(event) {
     console.log('主视频剩余时间:', Math.floor(video.duration - video.currentTime))
 }
 
+onMounted(async function(){
+    let res=await get_video_info(video_id.value)
+    res=res.data
+    res.tags=res.tags.split(/[,，]/)
+    main_video_info.value=res
+    console.log(res)
+})
 
 </script>
 

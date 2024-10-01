@@ -2,9 +2,9 @@
     <div class="recommend_more">
         <div class="content">
             <div class="item_list">
-                <div class="item" v-for="(item, index) in re_data" :key="index">
+                <div class="item" v-for="(item, index) in recommend_video_list" :key="index">
                     <div class="video_box" @click="videoDetail(item.video_id)">
-                        <video :src="item.video_mat" ref="videoRefs" 
+                        <video :src="'http://localhost:8000/static/video/'+item.video_file_path" ref="videoRefs" 
                         :muted="isMuted"
                         @loadedmetadata="setDuration(index)" 
                         @mouseenter="mouseEnter(index)" 
@@ -18,13 +18,13 @@
                     </div>
                     <div class="video_name">
                         <span>
-                            {{ item.video_name }}
+                            {{ item.title }}
                         </span>
                     </div>
                     <div class="video_info">
-                        <span style="color: rgb(133,133,133);font-size:12px;">{{ item.video_speaker }}
-                            &nbsp;{{ item.video_watch_count }}次观看
-                            &nbsp; {{ item.video_create_time }}</span>
+                        <span style="color: rgb(133,133,133);font-size:12px;">{{ item.username }}
+                            &nbsp;{{ item.watch_count }}次观看
+                            &nbsp; {{ item.create_time }}</span>
                     </div>
                 </div>
             </div>
@@ -42,9 +42,12 @@ import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 import scroll_box from './scroll_box.vue'
 import the_end_page from './the_end_page.vue';
+import get_recommend_video from './js/get_recommend_video';
 
 const store = useStore();
 const router = useRouter();
+
+let recommend_video_list = ref([])
 
 //视频详情跳转
 function videoDetail(id) {
@@ -63,46 +66,8 @@ function switch_sound(event) {
 
 let videoRefs = ref([]);
 
-let tags=ref(['标签一', '标签二', '标签三', '标签四', '标签五', '标签六', '标签七', '标签八', '标签九', '标签十'])
+let tags=ref([])
 
-let re_data = ref([
-    {
-        video_id: 1,
-        video_name: '视频名称',
-        video_mat: 'src/assets/video/v1.mp4',
-        video_speaker: '视频作者',
-        video_create_time: '2024-03-03',
-        video_watch_count: 100,
-        duration: '00:00:00'
-    },
-    {
-        video_id: 2,
-        video_name: '视频名称',
-        video_mat: 'src/assets/video/v1.mp4',
-        video_speaker: '视频作者',
-        video_create_time: '2024-03-03',
-        video_watch_count: 100,
-        duration: '00:00:00'
-    },
-    {
-        video_id: 3,
-        video_name: '视频名称',
-        video_mat: 'src/assets/video/v1.mp4',
-        video_speaker: '视频作者',
-        video_create_time: '2024-03-03',
-        video_watch_count: 100,
-        duration: '00:00:00'
-    },
-    {
-        video_id: 4,
-        video_name: '视频名称',
-        video_mat: 'src/assets/video/v1.mp4',
-        video_speaker: '视频作者',
-        video_create_time: '2024-03-03',
-        video_watch_count: 100,
-        duration: '00:00:00'
-    }
-])
 
 // 通过 ref 获取视频元素并设置时长
 function setDuration(index) {
@@ -111,7 +76,7 @@ function setDuration(index) {
         const duration = videoElement.duration;
         const minutes = String(Math.floor(duration / 60)).padStart(2, '0');
         const seconds = String(Math.floor(duration % 60)).padStart(2, '0');
-        re_data.value[index].duration = `${minutes}:${seconds}`;
+        recommend_video_list.value[index].duration = `${minutes}:${seconds}`;
     }
 }
 
@@ -130,6 +95,22 @@ function mouseLeave(index) {
     }
 }
 
+onMounted(async()=>{
+    let temp_arr=await get_recommend_video()
+    temp_arr=temp_arr.data
+    let temp_arr2=[]
+    let temp_tag_arr=[]
+    for(let i=0;i<4;i++){
+        temp_arr2.push(temp_arr[i])
+        temp_arr2[i].duration='00:00:00'
+        temp_tag_arr=temp_arr[i].tags.split(/[,，]/)
+        for(let j=0;j<temp_tag_arr.length;j++){
+            tags.value.push(temp_tag_arr[j])
+        }
+        temp_tag_arr=[]
+    }
+    recommend_video_list.value=temp_arr2
+})
 
 </script>
 

@@ -34,6 +34,6 @@ export interface RootState {
 
 // 定义 mutation 类型
 export type Mutation = {
-  type: string;
+  type: any;
   payload?: any;
 };

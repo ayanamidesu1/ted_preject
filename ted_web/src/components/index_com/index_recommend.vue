@@ -1,34 +1,38 @@
 <template>
     <div class="index_recommend">
-        <div class="content">
+        <div class="content" v-if="recommend_video_list.length > 0">
             <div class="video_info">
                 <div class="recommend_title">
-                    推荐理由
+                    <span>推荐视频的标签</span>
                 </div>
                 <div class="recommend_tag">
-                    <span>推荐的内容标签</span>
+                    <span v-for="(item,index) in recommend_video_list[0].tags.split(/[,，]/)" :key="index">
+                        {{ item }}
+                    </span>
                 </div>
                 <div class="recommend_video_title">
-                    <span>推荐视频标题</span>
+                    <span>{{recommend_video_list[0].title}}</span>
                 </div>
                 <div class="recommend_video_info">
-                    <span>推荐视频简介</span>
+                    <span>{{recommend_video_list[0].introduce}}</span>
                 </div>
                 <div class="recommend_video_d_info">
                     <span>推荐视频播放信息</span>
                     <div class="speaker_info">
-                        <span>演讲人：{{ video_player_info.speaker }}</span>
+                        <span>演讲人：{{ recommend_video_list[0].username }}</span>
                     </div>
                     <div class="video_play_info">
-                        <span>{{ video_player_info.play_count }}次</span>.<span>大约 {{ time_since_creation }}</span>
+                        <span>{{ recommend_video_list[0].watch_count }}次播放</span>.<span>大约 {{ time_since_creation }}</span>
                     </div>
                 </div>
             </div>
             <div class="video_content">
-                <div class="video_player">
-                    <router-link to="/content_page">
+                <div class="video_player" @click="jump_video_content(recommend_video_list[0].video_id)">
+                   
                         <div class="jump_link">
-                            <video class="video" :src="video_path" preload="auto" ref="videoElement"
+                            <video class="video" 
+                            :src="'http://localhost:8000/static/video/'+recommend_video_list[0].video_file_path"
+                             preload="auto" ref="videoElement"
                             :muted="isMuted"
                                 @mouseenter="playVideo" @mouseleave="pauseVideo" @timeupdate="updateTime">
                             </video>
@@ -39,7 +43,7 @@
                                 <img :src="'/src/assets/svg/'+(isMuted?'声音关.svg':'声音开.svg')" class="icon">
                             </div>
                         </div>
-                    </router-link>
+                   
                 </div>
             </div>
         </div>
@@ -48,14 +52,17 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed,onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router'
 import recommend_more from './recommend_more.vue';
+import get_recommend_video from './js/get_recommend_video';
 
 // 使用 Vuex store 和 Vue Router
 const store = useStore()
 const router = useRouter()
+
+const recommend_video_list = ref([])
 
 //声音开关
 let isMuted = ref(true)
@@ -125,15 +132,27 @@ function calculateTimeDifference(creationTime) {
     return `${years} 年前`
 }
 
-// 创建时间距今的时间显示
-let time_since_creation = ref(calculateTimeDifference(video_player_info.value.create_time))
-
 // Vuex 全局跳转示例，假设有一个跳转方法
 function goToVideoPage(videoId) {
     // 使用 Vuex 管理跳转逻辑
     store.commit('SET_CURRENT_VIDEO', videoId)
     router.push({ name: 'VideoDetail', params: { id: videoId } })
 }
+
+//跳转进入视频详情页
+function jump_video_content(video_id){
+    router.push('/content_page')
+    store.commit('set_video_id',String(video_id))
+}
+
+let time_since_creation=ref()
+onMounted(async()=>{
+    recommend_video_list.value=await get_recommend_video()
+    recommend_video_list.value=recommend_video_list.value.data
+    console.log(recommend_video_list.value)
+    // 创建时间距今的时间显示
+    time_since_creation.value = calculateTimeDifference(recommend_video_list.value[0].create_time)
+})
 </script>
 
 <style scoped>
@@ -160,6 +179,9 @@ function goToVideoPage(videoId) {
     height: auto;
     display: flex;
     margin-right: 10px;
+}
+.video_player{
+    cursor: pointer;
 }
 .jump_link{
     position: relative;
@@ -198,6 +220,8 @@ function goToVideoPage(videoId) {
 }
 
 .recommend_tag {
+    display: flex;
+    gap:5px;
     color: red;
 }
 

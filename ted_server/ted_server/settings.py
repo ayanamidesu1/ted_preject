@@ -65,7 +65,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     "user.apps.UserConfig",
-    "comment.apps.CommentConfig"  # Enable CORS support
+    "comment.apps.CommentConfig",
+    "video.apps.VideoConfig"  # Enable CORS support
 ]
 
 MIDDLEWARE = [

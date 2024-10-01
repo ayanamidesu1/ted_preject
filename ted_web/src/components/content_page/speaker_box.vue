@@ -7,24 +7,24 @@
             <div class="speaker_info">
                 <div class="info_box">
                     <div class="avatar">
-                        <img :src="speaker_info.avatar">
+                        <img :src="'http://localhost:8000/static/img/thumbnail/'+user_info.avatar_path+'.png'">
                     </div>
                     <div class="speaker_name">
-                        <span style="font-size: 18px;font-weight:bold;">{{ speaker_info.name }}</span>
-                        <span style="font-size: 12px;color:rgb(133,133,133)">{{ speaker_info.title }}</span>
+                        <span style="font-size: 18px;font-weight:bold;">{{user_info.username }}</span>
+                        <span style="font-size: 12px;color:rgb(133,133,133)">{{ user_info.user_tags }}</span>
                     </div>
                 </div>
                 <div class="speaker_intruduction">
-                    <span>{{ speaker_info.intruduction }}</span>
+                    <span>{{ user_info.introduce }}</span>
                 </div>
             </div>
             <div class="speaker_self_website_list">
                 <div class="website_box">
                     <div class="website_intruduction">
-                        <span>{{ speaker_info.self_website_intruduction }}</span>
+                        <span>{{user_info.self_website_introduce }}</span>
                     </div>
                     <div class="go_website">
-                        <a :href="speaker_info.self_website">
+                        <a :href="user_info.self_website" target="_blank">
                             <span>学习/了解&nbsp;→</span>
                         </a>
                     </div>
@@ -35,7 +35,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue';
+import { ref,defineProps,defineEmits } from 'vue';
 let speaker_info = ref({
     avatar: "src/assets/image/65014220_p0.jpg",
     title: '气候影响学者',
@@ -44,6 +44,11 @@ let speaker_info = ref({
     self_website: "https://localhost:10000",
     self_website_intruduction: "这是一段个人网站介绍",
 })
+
+let props = defineProps({
+    user_info: Object
+})
+let user=ref(JSON.parse(localStorage.getItem('user')))
 
 </script>
 
