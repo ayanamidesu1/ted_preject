@@ -1,5 +1,5 @@
 <template>
-    <div class="content_page">
+    <div class="content_page" :key="video_id">
         <div class="content" v-if="main_video_info">
             <div class="video_info">
                 <div class="video_box">

@@ -14,7 +14,7 @@ const store = createStore<RootState>({
         content_page: {},
         pageStack: [],
         pushTimer: null,
-        video_id: '1',
+        video_id: '',
         is_login: false,
     },
     mutations: {

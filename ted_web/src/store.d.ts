@@ -29,6 +29,7 @@ export interface RootState {
     pageStatus: any;
     content_page: any;
   }>;
+  video_id:any;
   pushTimer: NodeJS.Timeout | null;
 }
 

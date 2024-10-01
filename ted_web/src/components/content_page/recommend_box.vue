@@ -5,11 +5,12 @@
             <h2>接下来观看</h2>
             <div class="recommend_list">
                 <!-- 推荐视频列表，使用v-for循环 -->
-                <div class="recommend_item" v-for="(video, index) in videoList" :key="index"
+                <div class="recommend_item" v-for="(video, index) in recommend_video_list" :key="index"
                     @mouseenter="playRecommendVideo(index)" @mouseleave="pauseRecommendVideo(index)">
-                    <div class="recommend_video_box" @click="jump_link()">
+                    <div class="recommend_video_box" @click="jump_link(video.video_id)">
                         <!-- 推荐视频播放器 -->
-                        <video ref="recommendRefs" class="recommend-video" :src="video.src" muted
+                        <video ref="recommendRefs" class="recommend-video" 
+                        :src="'http://localhost:8000/static/video/'+video.video_file_path" muted
                             @timeupdate="updateRecommendTime(index)"></video>
                         <div class="time">
                             <span>{{ remainingTimes[index] }} 秒</span>
@@ -17,13 +18,13 @@
                     </div>
                     <div class="recommend_info">
                         <div class="recommend_time">
-                            <span>{{ video.date }}</span>
+                            <span>{{ video.create_time }}</span>
                         </div>
                         <div class="recommend_title">
-                            <span>标题 {{ index + 1 }}</span>
+                            <span>{{ video.title }}</span>
                         </div>
                         <div class="recommend_speaker">
-                            <span>Speaker</span>
+                            <span>{{video.username}}</span>
                         </div>
                     </div>
                 </div>
@@ -37,14 +38,17 @@
 import { ref, onMounted } from 'vue'
 import { useStore } from 'vuex'
 import { useRouter } from 'vue-router';
+import get_recommend_video from './js/get_recommend_video'
 
 const store = useStore()
 const router = useRouter()
 
+let recommend_video_list=ref([])
+
 //进入推荐视频页面
-function jump_link(){
+function jump_link(video_id){
     router.push('/content_page')
-    store.commit('set_video_id',1)
+    store.commit('set_video_id',video_id)
 }
 
 // 主视频的播放路径
@@ -97,10 +101,15 @@ function updateRecommendTime(index) {
     }
 }
 
-onMounted(() => {
+onMounted(async () => {
     fetchVideoList() // 动态加载视频数据
     // 通过 refs 获取视频引用
     recommendRefs.value = []
+    recommend_video_list.value = await get_recommend_video()
+    recommend_video_list.value=recommend_video_list.value.data
+    console.log(recommend_video_list.value)
+    //剩余时间初始化
+    remainingTimes.value = Array(recommend_video_list.value.length).fill(0)
 })
 </script>
 
