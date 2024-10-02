@@ -5,6 +5,7 @@ import login from '../components/login_page/login.vue'
 import register from '../components/register_page/register.vue'
 import root from '../components/root.vue'
 import index_page from '../components/index_page.vue'
+import user_center from '../components/user_center/user_center.vue'
 
 const routes = [
   {
@@ -22,7 +23,12 @@ const routes = [
           {
             path: 'content_page',
             name: 'content_page',
-            component: content_page
+            component: content_page//内容页面
+          },
+          {
+            path:'user_center',
+            name:'user_center',
+            component:user_center//用户中心
           }
         ]
       }
@@ -31,12 +37,12 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    component: login
+    component: login//登录页面
   },
   {
     path: '/register',
     name: 'register',
-    component: register
+    component: register//注册页面
   }
 ]
 

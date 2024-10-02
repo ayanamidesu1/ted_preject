@@ -14,7 +14,7 @@
                     <div class="info_item">
                         <span>{{ userinfo.email }}</span>
                     </div>
-                    <div class="info_item">
+                    <div class="info_item" @click="jump_user_center()">
                         <span>进入个人中心</span>
                     </div>
                     <div class="info_item">
@@ -48,6 +48,10 @@ const clear = () => {
     router.push('/login');
 };
 
+//用户中心跳转
+function jump_user_center() {
+    router.push('/user_center');
+}
 
 onMounted(async () => {
     let res = await get_userinfo();

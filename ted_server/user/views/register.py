@@ -37,7 +37,7 @@ class RegisterView(View):
     def generate_unique_filename(self, path):
         while True:
             file_name = ''.join([str(random.randint(0, 9)) for _ in range(21)])
-            file_path = os.path.join(path, file_name + ".jpg")
+            file_path = os.path.join(path, file_name + ".png")
             if not os.path.exists(file_path):
                 return file_name
 
