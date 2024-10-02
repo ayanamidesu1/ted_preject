@@ -10,28 +10,25 @@ from .log.log import Logger
 import json
 from .re_write_img import ReWriteImg
 from django.contrib.auth.hashers import make_password
-from django.conf import settings  # 使用Django settings获取路径
 
 re_write_img = ReWriteImg()
 logger = Logger()
 
-
 class EditUserInfo(APIView):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # 使用settings获取路径，避免硬编码
-        self.save_path = os.path.join(settings.BASE_DIR, 'static/img/')
+        self.save_path = os.path.join(os.path.dirname(__file__), '../../static/img/')
         self.thumbnail_path = os.path.join(self.save_path, 'thumbnail')
         self.img_file_path = os.path.join(self.save_path, 'img')
 
-        # 确保目录存在
         os.makedirs(self.thumbnail_path, exist_ok=True)
         os.makedirs(self.img_file_path, exist_ok=True)
 
     def request_path(self, request):
+        request_path = request.path
         request_ip = request.META.get('REMOTE_ADDR', '未知IP')
         now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        return f'{request_ip} 在 {now} 访问了 {request.path}'
+        return f'{request_ip} 在 {now} 访问了 {request_path}'
 
     def get(self, request):
         logger.warning(self.request_path(request) + str(request.user))
@@ -39,128 +36,100 @@ class EditUserInfo(APIView):
 
     def post(self, request):
         try:
-            # 用户未登录
             if not request.user.is_authenticated:
                 return JsonResponse({'status': 401, 'msg': '用户未登录'}, status=401)
 
             user_id = request.user.id
             data = json.loads(request.body.decode('utf-8'))
-
-            # 根据edit_type调用相应的方法
             edit_type = data.get('edit_type')
+
             with connection.cursor() as cursor:
-                if edit_type == 'avatar':
-                    return self.edit_user_avatar(request, user_id, cursor)
+                if edit_type == 'username':
+                    return self.edit_username(data, user_id, cursor)
+                elif edit_type == 'user_tags':
+                    return self.update_field(cursor, user_id, 'user_tags',
+                                             data.get('user_tags'), '标签不能为空')
+                elif edit_type == 'self_website':
+                    return self.update_field(cursor, user_id, 'self_website',
+                                             data.get('self_website'), '网址不能为空')
+                elif edit_type == 'self_website_introduce':
+                    return self.update_field(cursor, user_id, 'self_website_introduce',
+                                             data.get('self_website_introduce'), '网址介绍不能为空')
+                elif edit_type == 'password':
+                    return self.change_password(data, user_id, cursor)
                 else:
-                    return self.edit_foundation_info(request, user_id, cursor, edit_type)
+                    return JsonResponse({'status': 400, 'msg': '未知的修改类型'}, status=400)
 
         except Exception as e:
             logger.error(e)
             return JsonResponse({'status': 500, 'msg': '服务器错误'}, status=500)
+
+    def edit_username(self, data, user_id, cursor):
+        username = data.get('username')
+        if not username:
+            return JsonResponse({'status': 400, 'msg': '用户名不能为空'}, status=400)
+
+        cursor.execute('SELECT id FROM auth_user WHERE username=%s', [username])
+        if cursor.rowcount > 0:
+            return JsonResponse({'status': 400, 'msg': '用户名已存在'}, status=400)
+
+        return self.update_field(cursor, user_id, 'username', username)
+
+    def update_field(self, cursor, user_id, field, value, empty_msg=None):
+        if not value:
+            return JsonResponse({'status': 400, 'msg': empty_msg or '字段不能为空'}, status=400)
+
+        sql = f'UPDATE auth_user SET {field}=%s WHERE id=%s'
+        with transaction.atomic():
+            cursor.execute(sql, [value, user_id])
+            if cursor.rowcount == 1:
+                return JsonResponse({'status': 200, 'msg': '修改成功'}, status=200)
+            else:
+                raise Exception('修改数量异常')
+
+    def change_password(self, data, user_id, cursor):
+        once_password = data.get('once_password')
+        new_password = data.get('new_password')
+        email = data.get('email')
+
+        if not (once_password and new_password and email):
+            return JsonResponse({'status': 400, 'msg': '参数错误'}, status=400)
+
+        cursor.execute('SELECT password FROM auth_user WHERE id=%s AND email=%s', [user_id, email])
+        if cursor.rowcount != 1:
+            return JsonResponse({'status': 400, 'msg': '邮箱错误'}, status=400)
+
+        user_info = cursor.fetchone()
+        if user_info[0] != once_password:
+            return JsonResponse({'status': 400, 'msg': '密码错误'}, status=400)
+
+        if len(new_password) < 8 or len(set(new_password)) < 2:
+            return JsonResponse({'status': 400, 'msg': '密码不符合要求'}, status=400)
+
+        new_password_hashed = make_password(new_password)
+        return self.update_field(cursor, user_id, 'password', new_password_hashed)
 
     def edit_user_avatar(self, request, user_id, cursor):
-        try:
-            file = request.FILES.get('file')
-            re_write_img.set_file(file)
-            original_img_file = re_write_img.copy_paste()
-            thumbnail_file = re_write_img.process_image()
+        file = request.FILES.get('file')
+        re_write_img.set_file(file)
+        original_img_file = re_write_img.copy_paste()
+        thumbnail_file = re_write_img.process_image()
 
-            # 生成唯一文件名
-            unique_filename = self.generate_unique_filename(self.img_file_path)
+        unique_filename = self.generate_unique_filename(self.img_file_path)
+        original_image_path = os.path.join(self.img_file_path, f"{unique_filename}.png")
+        thumbnail_image_path = os.path.join(self.thumbnail_path, f"{unique_filename}.png")
 
-            # 保存缩略图和原始图像
-            original_image_path = os.path.join(self.img_file_path, f"{unique_filename}.png")
-            thumbnail_image_path = os.path.join(self.thumbnail_path, f"{unique_filename}.png")
+        with open(original_image_path, 'wb') as f:
+            f.write(original_img_file.read())
 
-            # 将原始图像保存
-            with open(original_image_path, 'wb') as f:
-                f.write(original_img_file.read())
+        with open(thumbnail_image_path, 'wb') as f:
+            f.write(thumbnail_file.read())
 
-            # 将缩略图保存到指定路径
-            with open(thumbnail_image_path, 'wb') as f:
-                f.write(thumbnail_file.read())
-
-            sql = 'UPDATE auth_user SET avatar_path=%s WHERE id=%s'
-            with transaction.atomic():
-                cursor.execute(sql, (unique_filename, user_id))
-                if cursor.rowcount == 1:
-                    return JsonResponse({'status': 200, 'msg': '修改成功'}, status=200)
-                else:
-                    raise Exception('修改数量异常')
-
-        except Exception as e:
-            logger.error(e)
-            return JsonResponse({'status': 500, 'msg': '服务器错误'}, status=500)
-
-    def edit_foundation_info(self, request, user_id, cursor, edit_type):
-        data = json.loads(request.body.decode('utf-8'))
-        fields_mapping = {
-            'username': '用户名',
-            'user_tags': '标签',
-            'self_website': '网址',
-            'self_website_introduce': '网址介绍'
-        }
-
-        if edit_type in fields_mapping:
-            field_value = data.get(edit_type, False)
-            if field_value:
-                return self.update_field(cursor, edit_type, field_value, user_id, fields_mapping[edit_type])
-            else:
-                return JsonResponse({'status': 400, 'msg': f'{fields_mapping[edit_type]}不能为空'}, status=400)
-
-        elif edit_type == 'password':
-            return self.edit_password(request, user_id, cursor)
-        else:
-            return JsonResponse({'status': 400, 'msg': '无效的修改类型'}, status=400)
-
-    def update_field(self, cursor, field, value, user_id, field_name):
-        sql = f'UPDATE auth_user SET {field}=%s WHERE id=%s'
-        try:
-            with transaction.atomic():
-                cursor.execute(sql, [value, user_id])
-                if cursor.rowcount == 1:
-                    return JsonResponse({'status': 200, 'msg': '修改成功'}, status=200)
-                else:
-                    raise Exception('修改数量异常')
-        except Exception as e:
-            logger.error(e)
-            return JsonResponse({'status': 500, 'msg': f'{field_name}修改失败'}, status=500)
-
-    def edit_password(self, request, user_id, cursor):
-        data = json.loads(request.body.decode('utf-8'))
-        once_password = data.get('once_password', False)
-        new_password = data.get('new_password', False)
-        email = data.get('email', False)
-        username = request.user.username
-
-        if once_password and new_password and email:
-            cursor.execute('SELECT password FROM auth_user WHERE username=%s AND email=%s', [username, email])
-            if cursor.rowcount == 1:
-                current_password = cursor.fetchone()[0]
-                if current_password == once_password:
-                    if len(new_password) < 8:
-                        return JsonResponse({'status': 400, 'msg': '密码长度不能小于8位'}, status=400)
-                    if len(set(new_password)) < 2:
-                        return JsonResponse({'status': 400, 'msg': '密码必须包含两种不同的字符'}, status=400)
-
-                    new_password_hashed = make_password(new_password)
-                    sql = 'UPDATE auth_user SET password=%s WHERE id=%s'
-                    with transaction.atomic():
-                        cursor.execute(sql, [new_password_hashed, user_id])
-                        if cursor.rowcount == 1:
-                            return JsonResponse({'status': 200, 'msg': '修改成功'}, status=200)
-                        else:
-                            raise Exception('修改数量异常')
-                else:
-                    return JsonResponse({'status': 400, 'msg': '原密码错误'}, status=400)
-            else:
-                return JsonResponse({'status': 400, 'msg': '邮箱错误'}, status=400)
-        else:
-            return JsonResponse({'status': 400, 'msg': '参数错误'}, status=400)
+        return self.update_field(cursor, user_id, 'avatar_path', unique_filename)
 
     def generate_unique_filename(self, path):
         while True:
             file_name = ''.join([str(random.randint(0, 9)) for _ in range(21)])
-            file_path = os.path.join(path, file_name + ".png")
+            file_path = os.path.join(path, f"{file_name}.png")
             if not os.path.exists(file_path):
                 return file_name

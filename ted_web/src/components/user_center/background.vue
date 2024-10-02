@@ -14,7 +14,10 @@
             </div>
             <div class="user_info">
                 <div class="username">
-                    <span>{{data.username}}</span>
+                    <input v-model="data.username" type="text" placeholder="用户名">
+                    <div class="edit_info_box">
+                        <img src="http://localhost:8000/static/svg/编辑.svg" alt="编辑" class="icon">
+                    </div>
                 </div>
                 <div class="user_tags">
                     <span>{{data.user_tags}}</span>
@@ -43,6 +46,11 @@ let data=computed(()=>(props.user_info.data.user_info))
 </script>
 
 <style scoped>
+.icon{
+    width:25px;
+    height: 25px;
+    object-fit: cover;
+}
 .content{
     width: 100%;
     height: 100%;
@@ -119,6 +127,11 @@ let data=computed(()=>(props.user_info.data.user_info))
     max-width: 200px;
     overflow: hidden;
 }
+.username{
+    display: flex;
+    gap:5px;
+    width: auto;
+}
 .self_website{
     display: flex;
     flex-direction: column;
@@ -126,5 +139,12 @@ let data=computed(()=>(props.user_info.data.user_info))
     justify-content: space-around;
     max-width: 300px;
     overflow: hidden;
+}
+.user_box input{
+    border: none;
+    outline: none;
+    background: none;
+    font-size: 16px;
+    width: calc(100% - 25px);
 }
 </style>
