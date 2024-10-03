@@ -66,7 +66,7 @@ async function edit_user_avatar(file: File): Promise<any> {
         formData.append('file', file);
         formData.append('edit_type', 'avatar'); // 加入 edit_type 字段
 
-        const res = await fetch('http://localhost:8000/api/user/EditUserInfo/', {
+        const res = await fetch('http://localhost:8000/api/user/EditUserAvatar/', {
             method: 'post',
             headers: {
                 'Authorization': `Bearer ${localStorage.getItem('auth_token')}`

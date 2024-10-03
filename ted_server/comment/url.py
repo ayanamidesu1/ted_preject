@@ -1,9 +1,9 @@
 from django.urls import path
 
-from comment.views.add_comment import AddComment
-from comment.views.get_comment import GetComment
-from comment.views.get_reply_comment import GetReplyComment
-from comment.views.interaction_comment import InteractionComment
+from .views.add_comment import AddComment
+from .views.get_comment import GetComment
+from .views.get_reply_comment import GetReplyComment
+from .views.interaction_comment import InteractionComment
 
 urlpatterns = [
   path('GetComment/',GetComment.as_view(),name='GetComment'),

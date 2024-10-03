@@ -1,8 +1,8 @@
 from django.urls import path
 
-from video.views.get_video_info import GetVideoInfo
-from video.views.recommend_video import RecommendVideo
-from video.views.video_interaction import VideoInteraction
+from .views.get_video_info import GetVideoInfo
+from .views.recommend_video import RecommendVideo
+from .views.video_interaction import VideoInteraction
 
 urlpatterns=[
     path('GetVideoInfo/',GetVideoInfo.as_view(),name='GetVideoInfo'),

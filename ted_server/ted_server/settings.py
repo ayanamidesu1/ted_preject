@@ -116,5 +116,7 @@ CSRF_COOKIE_HTTPONLY = False  # CSRF 不再依赖 cookies，禁用该选项
 CSRF_USE_SESSIONS = False     # 不使用 Session 存储 CSRF Token
 CSRF_COOKIE_NAME = 'csrftoken'        # 不使用 cookie 名称
 CORS_ALLOW_CREDENTIALS = True
+DATA_UPLOAD_MAX_MEMORY_SIZE = 5242880*100  # 5 MB
+
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

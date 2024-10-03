@@ -8,8 +8,8 @@ from rest_framework_simplejwt.views import (
 )
 from django.conf import settings
 from django.conf.urls.static import static
-from ted_server.get_csrf_token import CSRFTokenView
-from ted_server.views import CustomTokenObtainPairView
+from .get_csrf_token import CSRFTokenView
+from .views import CustomTokenObtainPairView
 
 urlpatterns = [
                   path('api/token/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
